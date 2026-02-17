@@ -1,0 +1,147 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║          🤖 JobHunter AI — Your Profile Config              ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+name: "Rithvik Mysore Suresh"
+email: "rithviksit@gmail.com"
+phone: "+1-XXX-XXX-XXXX"
+location: "United States"
+
+resume_url: ""
+linkedin_url: ""
+github_url: ""
+portfolio_url: ""
+
+# ── Target Roles ─────────────────────────────────────────────
+target_roles:
+  - "AI Engineer"
+  - "Machine Learning Engineer"
+  - "Software Engineer"
+  - "Full Stack Engineer"
+  - "Backend Engineer"
+  - "MLOps Engineer"
+  - "Applied AI Scientist"
+  - "LLM Engineer"
+  - "Platform Engineer"
+
+target_keywords:
+  - "LLM"
+  - "generative AI"
+  - "RAG"
+  - "transformer"
+  - "langchain"
+  - "autonomous agents"
+  - "NLP"
+  - "deep learning"
+  - "computer vision"
+  - "distributed systems"
+
+experience_years: 3
+
+skills:
+  - "Python"
+  - "TypeScript"
+  - "JavaScript"
+  - "React"
+  - "Node.js"
+  - "FastAPI"
+  - "Django"
+  - "PostgreSQL"
+  - "MongoDB"
+  - "Redis"
+  - "Docker"
+  - "Kubernetes"
+  - "AWS"
+  - "GCP"
+  - "Terraform"
+  - "PyTorch"
+  - "TensorFlow"
+  - "LangChain"
+  - "OpenAI API"
+  - "Anthropic API"
+  - "Hugging Face"
+  - "Vector Databases"
+  - "Pinecone"
+  - "Weaviate"
+  - "CI/CD"
+  - "Git"
+
+education:
+  - degree: "B.S. Computer Science"
+    university: "Your University"
+    year: 2022
+    gpa: "3.8"
+
+work_experience:
+  - title: "AI Engineer"
+    company: "Your Current/Last Company"
+    duration: "2022 - Present"
+    highlights:
+      - "Built RAG pipelines serving 10K+ users"
+      - "Developed autonomous AI agents using LangChain"
+      - "Reduced inference latency by 60% with model optimization"
+
+projects:
+  - name: "AI Job Hunter Agent"
+    description: "Multi-agent system that autonomously searches jobs, finds recruiters, and queues applications"
+    tech: ["Python", "LLM APIs", "GitHub Actions"]
+    url: ""
+
+  - name: "RAG Knowledge Base"
+    description: "Enterprise RAG system with hybrid search over 1M+ documents"
+    tech: ["LangChain", "Pinecone", "FastAPI", "React"]
+    url: ""
+
+  - name: "Real-time ML Pipeline"
+    description: "End-to-end ML pipeline processing 50K events/sec with auto-retraining"
+    tech: ["PyTorch", "Kafka", "Kubernetes", "MLflow"]
+    url: ""
+
+# ── Job Preferences — US WIDE, SF BAY AREA FOCUS ────────────
+preferred_locations:
+  - "San Francisco, CA"
+  - "San Jose, CA"
+  - "Mountain View, CA"
+  - "Palo Alto, CA"
+  - "New York, NY"
+  - "Seattle, WA"
+  - "Austin, TX"
+  - "Los Angeles, CA"
+  - "Chicago, IL"
+  - "Boston, MA"
+  - "Denver, CO"
+  - "Remote"
+
+remote_ok: true
+min_salary: 120000
+visa_required: false
+
+# ── Search Settings ──────────────────────────────────────────
+search:
+  sources:
+    - "linkedin"
+    - "indeed"
+    - "greenhouse"
+    - "lever"
+    - "ashby"
+    - "wellfound"
+    - "ycombinator"
+    - "google_jobs"
+
+  max_age_days: 3
+  min_relevance_score: 60
+
+  company_size_preference:
+    - "seed"
+    - "series_a"
+    - "series_b"
+    - "startup"
+
+  exclude_companies: []
+
+  exclude_keywords:
+    - "intern"
+    - "director"
+    - "VP"
+    - "Chief"
+    - "Principal"

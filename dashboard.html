@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 JobHunter AI — Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0a0f; --surface: #12121a; --surface-2: #1a1a26;
+            --border: #2a2a3a; --text: #e4e4ef; --text-dim: #8888a0;
+            --accent: #6366f1; --accent-glow: rgba(99, 102, 241, 0.15);
+            --green: #22c55e; --yellow: #eab308; --red: #ef4444; --purple: #a855f7;
+        }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 32px 0; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+        .header h1 { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header p { color: var(--text-dim); font-size: 14px; margin-top: 4px; }
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+        .load-btn, .config-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .load-btn:hover, .config-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+        .config-btn { background: var(--surface-2); border: 1px solid var(--border); }
+        .status-text { font-size: 12px; color: var(--green); }
+        .status-text.error { color: var(--red); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; }
+        .stat-card .number { font-size: 36px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+        .stat-card .label { color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+        .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface); padding: 4px; border-radius: 12px; border: 1px solid var(--border); }
+        .tab { flex: 1; padding: 12px 20px; border: none; background: transparent; color: var(--text-dim); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: all 0.2s; }
+        .tab.active { background: var(--accent); color: white; }
+        .tab:hover:not(.active) { background: var(--surface-2); color: var(--text); }
+        .card-list { display: flex; flex-direction: column; gap: 12px; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; transition: all 0.2s; }
+        .card:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-title { font-size: 16px; font-weight: 600; }
+        .card-meta { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+        .card-desc { color: var(--text-dim); font-size: 13px; margin-top: 12px; line-height: 1.6; }
+        .score-badge { padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+        .score-high { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+        .score-med { background: rgba(234, 179, 8, 0.15); color: var(--yellow); }
+        .score-low { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+        .card-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        .btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: inherit; font-size: 13px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+        .btn:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
+        .btn-primary:hover { background: #5558e6; }
+        .status-badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pending { background: rgba(234, 179, 8, 0.15); color: var(--yellow); }
+        .status-applied { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+        .email-preview { background: var(--bg); border-radius: 10px; padding: 16px; margin-top: 12px; font-size: 13px; line-height: 1.7; }
+        .email-subject { font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+        .email-tag { background: rgba(168,85,247,0.15); color: var(--purple); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .panel-hidden { display: none; }
+        .file-input { display: none; }
+        .config-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center; }
+        .config-modal.show { display: flex; }
+        .config-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 480px; }
+        .config-box h3 { margin-bottom: 16px; }
+        .config-box input { width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 14px; margin-bottom: 12px; }
+        .config-box label { font-size: 13px; color: var(--text-dim); margin-bottom: 4px; display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🤖 JobHunter AI</h1>
+                <p>Your autonomous job search command center</p>
+                <div class="status-text" id="statusText">Connecting...</div>
+            </div>
+            <div class="header-actions">
+                <button class="config-btn" onclick="showConfig()">⚙️ Set Repo</button>
+                <button class="load-btn" onclick="fetchData()">🔄 Refresh</button>
+                <label class="config-btn" style="cursor:pointer;">📂 Local
+                    <input type="file" class="file-input" id="folderInput" webkitdirectory multiple>
+                </label>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><div class="number" id="statJobs">—</div><div class="label">Jobs Found</div></div>
+            <div class="stat-card"><div class="number" id="statQueued">—</div><div class="label">Apps Queued</div></div>
+            <div class="stat-card"><div class="number" id="statDrafts">—</div><div class="label">Email Drafts</div></div>
+            <div class="stat-card"><div class="number" id="statRecruiters">—</div><div class="label">Recruiters</div></div>
+            <div class="stat-card"><div class="number" id="statCycles">—</div><div class="label">Cycles Run</div></div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="jobs">🎯 Jobs</button>
+            <button class="tab" data-tab="apps">📋 Applications</button>
+            <button class="tab" data-tab="drafts">✉️ Outreach</button>
+            <button class="tab" data-tab="recruiters">👤 Recruiters</button>
+        </div>
+
+        <div id="panel-jobs" class="card-list"></div>
+        <div id="panel-apps" class="card-list panel-hidden"></div>
+        <div id="panel-drafts" class="card-list panel-hidden"></div>
+        <div id="panel-recruiters" class="card-list panel-hidden"></div>
+    </div>
+
+    <!-- Config Modal -->
+    <div class="config-modal" id="configModal">
+        <div class="config-box">
+            <h3>⚙️ GitHub Repository</h3>
+            <label>GitHub Username</label>
+            <input type="text" id="cfgUser" placeholder="rimysore">
+            <label>Repository Name</label>
+            <input type="text" id="cfgRepo" placeholder="Job-hunter-AI">
+            <label>Branch</label>
+            <input type="text" id="cfgBranch" placeholder="main">
+            <div style="display:flex;gap:8px;margin-top:8px;">
+                <button class="btn-primary btn" onclick="saveConfig()">Save & Load</button>
+                <button class="btn" onclick="document.getElementById('configModal').classList.remove('show')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let data = { jobs: [], apps: [], drafts: [], recruiters: {}, cycles: [] };
+        let activeTab = 'jobs';
+
+        // Default config — auto-loads your repo
+        const DEFAULT_CONFIG = { user: 'rimysore', repo: 'Job-hunter-AI', branch: 'main' };
+
+        function getConfig() {
+            try {
+                const saved = localStorage.getItem('jh_config');
+                return saved ? JSON.parse(saved) : DEFAULT_CONFIG;
+            } catch { return DEFAULT_CONFIG; }
+        }
+
+        function showConfig() {
+            const cfg = getConfig();
+            document.getElementById('cfgUser').value = cfg.user;
+            document.getElementById('cfgRepo').value = cfg.repo;
+            document.getElementById('cfgBranch').value = cfg.branch;
+            document.getElementById('configModal').classList.add('show');
+        }
+
+        function saveConfig() {
+            const cfg = {
+                user: document.getElementById('cfgUser').value || 'rimysore',
+                repo: document.getElementById('cfgRepo').value || 'Job-hunter-AI',
+                branch: document.getElementById('cfgBranch').value || 'main',
+            };
+            localStorage.setItem('jh_config', JSON.stringify(cfg));
+            document.getElementById('configModal').classList.remove('show');
+            fetchData();
+        }
+
+        // AUTO-LOAD from GitHub on page load
+        async function fetchData() {
+            const cfg = getConfig();
+            const base = `https://raw.githubusercontent.com/${cfg.user}/${cfg.repo}/${cfg.branch}/data`;
+            const status = document.getElementById('statusText');
+            status.textContent = 'Loading from GitHub...';
+            status.className = 'status-text';
+
+            const files = {
+                jobs: 'job_queue.json',
+                apps: 'application_queue.json',
+                drafts: 'recruiter_drafts.json',
+                recruiters: 'recruiters.json',
+                cycles: 'cycle_log.json',
+            };
+
+            let loaded = 0;
+            for (const [key, file] of Object.entries(files)) {
+                try {
+                    const resp = await fetch(`${base}/${file}`, { cache: 'no-store' });
+                    if (resp.ok) {
+                        data[key] = await resp.json();
+                        loaded++;
+                    }
+                } catch (e) { /* file may not exist yet */ }
+            }
+
+            if (loaded > 0) {
+                status.textContent = `✅ Loaded ${loaded} files from ${cfg.user}/${cfg.repo}`;
+            } else {
+                status.textContent = '⚠️ No data yet — make sure repo is public or check config';
+                status.className = 'status-text error';
+            }
+            render();
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                activeTab = tab.dataset.tab;
+                document.querySelectorAll('[id^="panel-"]').forEach(p => p.classList.add('panel-hidden'));
+                document.getElementById(`panel-${activeTab}`).classList.remove('panel-hidden');
+            });
+        });
+
+        // Local file loading (backup)
+        document.getElementById('folderInput').addEventListener('change', async (e) => {
+            for (const file of Array.from(e.target.files)) {
+                try {
+                    const json = JSON.parse(await file.text());
+                    if (file.name === 'job_queue.json') data.jobs = json;
+                    else if (file.name === 'application_queue.json') data.apps = json;
+                    else if (file.name === 'recruiter_drafts.json') data.drafts = json;
+                    else if (file.name === 'recruiters.json') data.recruiters = json;
+                    else if (file.name === 'cycle_log.json') data.cycles = json;
+                } catch {}
+            }
+            document.getElementById('statusText').textContent = '✅ Loaded from local files';
+            render();
+        });
+
+        // FIX: Use nullish coalescing to handle score=0 properly
+        function getScore(job) {
+            return (job.relevance_score !== undefined && job.relevance_score !== null)
+                ? job.relevance_score : -1;
+        }
+
+        function scoreDisplay(job) {
+            const s = getScore(job);
+            return s >= 0 ? s + '%' : 'N/A';
+        }
+
+        function scoreClass(job) {
+            const s = getScore(job);
+            if (s >= 80) return 'score-high';
+            if (s >= 60) return 'score-med';
+            return 'score-low';
+        }
+
+        function statusClass(status) {
+            if (status === 'applied') return 'status-applied';
+            return 'status-pending';
+        }
+
+        function esc(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function render() {
+            document.getElementById('statJobs').textContent = data.jobs.length;
+            document.getElementById('statQueued').textContent = data.apps.length;
+            document.getElementById('statDrafts').textContent = data.drafts.length;
+            document.getElementById('statRecruiters').textContent =
+                typeof data.recruiters === 'object' && !Array.isArray(data.recruiters)
+                    ? Object.keys(data.recruiters).length
+                    : Array.isArray(data.recruiters) ? data.recruiters.length : 0;
+            document.getElementById('statCycles').textContent = data.cycles.length;
+
+            // Jobs
+            const jobsPanel = document.getElementById('panel-jobs');
+            if (!data.jobs.length) {
+                jobsPanel.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No jobs yet. Data auto-loads from GitHub every refresh.</p></div>';
+            } else {
+                const sorted = [...data.jobs].sort((a, b) => getScore(b) - getScore(a));
+                jobsPanel.innerHTML = sorted.slice(0, 100).map(j => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${esc(j.title)}</div>
+                                <div class="card-meta">${esc(j.company)} · ${esc(j.location)} · ${esc(j.source)}</div>
+                            </div>
+                            <span class="score-badge ${scoreClass(j)}">${scoreDisplay(j)}</span>
+                        </div>
+                        ${j.description ? `<div class="card-desc">${esc((j.description||'').substring(0,250))}...</div>` : ''}
+                        <div class="card-actions">
+                            ${j.url ? `<a href="${esc(j.url)}" target="_blank" class="btn btn-primary">View Job →</a>` : ''}
+                            ${j.relevance_reason ? `<span class="btn" style="cursor:default;font-size:12px">${esc(j.relevance_reason)}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Applications
+            const appsPanel = document.getElementById('panel-apps');
+            if (!data.apps.length) {
+                appsPanel.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No applications queued yet.</p></div>';
+            } else {
+                appsPanel.innerHTML = data.apps.map(a => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${esc(a.job_title)}</div>
+                                <div class="card-meta">${esc(a.company)} · ${esc(a.job_location)} · Score: ${a.relevance_score != null ? a.relevance_score + '%' : 'N/A'}</div>
+                            </div>
+                            <span class="status-badge ${statusClass(a.status)}">${esc(a.status)}</span>
+                        </div>
+                        <div class="card-desc">
+                            <strong>Pre-filled:</strong> ${a.prefilled ? Object.keys(a.prefilled).filter(k => a.prefilled[k]).length : 0} fields ·
+                            <strong>Needs:</strong> ${(a.needs_manual_input||[]).join(', ')}
+                        </div>
+                        <div class="card-actions">
+                            ${a.job_url ? `<a href="${esc(a.job_url)}" target="_blank" class="btn btn-primary">Apply Now →</a>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Drafts — show recruiter email if available
+            const draftsPanel = document.getElementById('panel-drafts');
+            if (!data.drafts.length) {
+                draftsPanel.innerHTML = '<div class="empty-state"><div class="icon">✉️</div><p>No outreach drafts yet.</p></div>';
+            } else {
+                draftsPanel.innerHTML = data.drafts.map(d => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">✉️ ${esc(d.recipient_name)}</div>
+                                <div class="card-meta">
+                                    ${esc(d.recipient_role)} at ${esc(d.company)} · Re: ${esc(d.job_title)}
+                                    ${d.recipient_email ? ` · <span class="email-tag">📧 ${esc(d.recipient_email)}</span>` : ''}
+                                </div>
+                            </div>
+                            <span class="status-badge ${statusClass(d.status)}">${esc(d.status || 'draft')}</span>
+                        </div>
+                        <div class="email-preview">
+                            <div class="email-subject">Subject: ${esc(d.subject)}</div>
+                            ${esc(d.body || '').replace(/\n/g, '<br>')}
+                        </div>
+                        <div class="card-actions">
+                            ${d.recipient_linkedin ? `<a href="${esc(d.recipient_linkedin)}" target="_blank" class="btn">LinkedIn →</a>` : ''}
+                            ${d.recipient_email ? `<a href="mailto:${esc(d.recipient_email)}?subject=${encodeURIComponent(d.subject||'')}&body=${encodeURIComponent(d.body||'')}" class="btn btn-primary">📧 Open in Mail</a>` : ''}
+                            <button class="btn" onclick="navigator.clipboard.writeText(this.closest('.card').querySelector('.email-preview').innerText).then(()=>this.textContent='✅ Copied!')">Copy</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Recruiters — show emails
+            const recPanel = document.getElementById('panel-recruiters');
+            const recEntries = typeof data.recruiters === 'object' && !Array.isArray(data.recruiters)
+                ? Object.values(data.recruiters)
+                : Array.isArray(data.recruiters) ? data.recruiters : [];
+            if (!recEntries.length) {
+                recPanel.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>No recruiter data yet.</p></div>';
+            } else {
+                recPanel.innerHTML = recEntries.map(r => `
+                    <div class="card">
+                        <div class="card-title">${esc(r.company)}</div>
+                        <div class="card-meta">Re: ${esc(r.job_title)}</div>
+                        <div style="margin-top:12px;">
+                            ${(r.people||[]).map(p => `
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+                                    <div>
+                                        <div style="font-weight:500;">${esc(p.name)}</div>
+                                        <div style="color:var(--text-dim);font-size:12px;">${esc(p.role)} · ${esc(p.person_type)}</div>
+                                        ${p.email ? `<div style="font-size:12px;margin-top:2px;"><span class="email-tag">📧 ${esc(p.email)}</span></div>` : ''}
+                                        ${p.outreach_angle ? `<div style="color:var(--accent);font-size:12px;margin-top:2px;">${esc(p.outreach_angle)}</div>` : ''}
+                                    </div>
+                                    <div style="display:flex;gap:6px;">
+                                        ${p.email ? `<a href="mailto:${esc(p.email)}" class="btn" style="font-size:12px;">Email</a>` : ''}
+                                        ${p.linkedin_url ? `<a href="${esc(p.linkedin_url)}" target="_blank" class="btn" style="font-size:12px;">LinkedIn</a>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Auto-load on page open
+        fetchData();
+        // Auto-refresh every 5 minutes
+        setInterval(fetchData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

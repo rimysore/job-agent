@@ -1,0 +1,103 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║     🤖 JobHunter AI — GitHub Actions Workflow               ║
+# ║     Runs every 15 minutes, 24/7, searching for jobs.        ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+name: 🤖 JobHunter AI Agent
+
+on:
+  # Run twice daily: 9:00 AM EST and 6:30 PM EST
+  schedule:
+    - cron: "0 14 * * *"   # 9:00 AM EST (14:00 UTC)
+    - cron: "30 23 * * *"  # 6:30 PM EST (23:30 UTC)
+
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable debug logging"
+        required: false
+        default: "false"
+
+  # Also run on push to main (for testing)
+  push:
+    branches: [main]
+    paths:
+      - "config/**"
+      - "agents/**"
+      - "main.py"
+
+# Prevent concurrent runs
+concurrency:
+  group: job-hunter
+  cancel-in-progress: false
+
+permissions:
+  contents: write  # Needed to commit data files back
+
+jobs:
+  hunt:
+    name: 🔍 Search & Notify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # ── Checkout ───────────────────────────────────────
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # ── Python Setup ───────────────────────────────────
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: 📦 Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── Restore Data Cache ─────────────────────────────
+      # This persists seen_jobs.json, application_queue.json, etc.
+      # across runs so we don't re-notify for the same jobs.
+      - name: 📂 Restore data cache
+        uses: actions/cache@v4
+        with:
+          path: data/
+          key: jobhunter-data-${{ github.sha }}
+          restore-keys: |
+            jobhunter-data-
+
+      - name: 📂 Ensure data directory
+        run: mkdir -p data
+
+      # ── Run the Agent ──────────────────────────────────
+      - name: 🤖 Run JobHunter Agent
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          JH_EMAIL: ${{ secrets.JH_EMAIL }}
+          PYTHONPATH: ${{ github.workspace }}
+        run: python main.py
+
+      # ── Persist Data Back to Repo ──────────────────────
+      # Commits updated data files so state persists across runs
+      - name: 💾 Commit updated data
+        run: |
+          git config --local user.email "jobhunter-bot@github.com"
+          git config --local user.name "JobHunter Bot"
+          git add data/ || true
+          git diff --staged --quiet || git commit -m "🤖 Auto-update: $(date -u '+%Y-%m-%d %H:%M UTC') — cycle complete"
+          git push || echo "Push failed (likely concurrent run)"
+
+      # ── Upload artifacts for debugging ─────────────────
+      - name: 📊 Upload cycle artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle-data-${{ github.run_number }}
+          path: data/
+          retention-days: 7
