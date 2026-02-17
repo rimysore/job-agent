@@ -19,9 +19,9 @@ on:
         required: false
         default: "false"
 
-  # Also run on push to main (for testing)
+  # Also run on push to master (for testing)
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "config/**"
       - "agents/**"
