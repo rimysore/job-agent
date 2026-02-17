@@ -257,7 +257,7 @@ class RecruiterFinderAgent:
             ])
 
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.0-flash",
                 contents=(
                     f"Analyze these people at {recruiter_data['company']} for a job outreach strategy. "
                     f"For each person, provide a JSON array with:\n"
@@ -267,16 +267,16 @@ class RecruiterFinderAgent:
                     f"- 'talking_points': list of 2-3 things to mention based on their role\n\n"
                     f"People:\n{people_text}\n\n"
                     f"Job being applied to: {recruiter_data['job_title']}\n\n"
-                    f"Return ONLY valid JSON array, no markdown."
+                    f"Return a JSON array."
                 ),
                 config=genai_types.GenerateContentConfig(
                     temperature=0.2,
                     max_output_tokens=1500,
+                    response_mime_type="application/json",
                 ),
             )
 
             text = response.text.strip()
-            text = text.replace("```json", "").replace("```", "").strip()
             insights = json.loads(text)
 
             for insight in insights:

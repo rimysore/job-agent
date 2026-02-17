@@ -626,9 +626,21 @@ class JobSearchAgent:
 
         client = genai.Client(api_key=self.gemini_key)
 
-        # Process in batches of 10
-        batch_size = 10
+        # Use gemini-2.0-flash: 1500 requests/day free (vs 20/day for 2.5-flash)
+        MODEL = "gemini-2.0-flash"
+
+        # Larger batches = fewer API calls = stay within rate limits
+        batch_size = 25
         scored = []
+
+        profile_summary = (
+            f"Target roles: {', '.join(self.profile['target_roles'])}\n"
+            f"Skills: {', '.join(self.profile['skills'][:20])}\n"
+            f"Experience: {self.profile['experience_years']} years\n"
+            f"Preferred locations: {', '.join(self.profile['preferred_locations'])}\n"
+            f"Remote OK: {self.profile['remote_ok']}\n"
+            f"Keywords: {', '.join(self.profile.get('target_keywords', []))}"
+        )
 
         for i in range(0, len(jobs), batch_size):
             batch = jobs[i:i + batch_size]
@@ -637,53 +649,48 @@ class JobSearchAgent:
                 f"Title: {job['title']}\n"
                 f"Company: {job['company']}\n"
                 f"Location: {job.get('location', 'N/A')}\n"
-                f"Description: {job.get('description', 'N/A')[:500]}"
+                f"Description: {job.get('description', 'N/A')[:300]}"
                 for j, job in enumerate(batch)
             ])
 
-            profile_summary = (
-                f"Target roles: {', '.join(self.profile['target_roles'])}\n"
-                f"Skills: {', '.join(self.profile['skills'][:20])}\n"
-                f"Experience: {self.profile['experience_years']} years\n"
-                f"Preferred locations: {', '.join(self.profile['preferred_locations'])}\n"
-                f"Remote OK: {self.profile['remote_ok']}\n"
-                f"Keywords: {', '.join(self.profile.get('target_keywords', []))}"
-            )
-
             try:
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model=MODEL,
                     contents=(
                         f"Score each job's relevance to this candidate profile (0-100).\n\n"
                         f"CANDIDATE PROFILE:\n{profile_summary}\n\n"
                         f"JOBS:\n{jobs_text}\n\n"
-                        f"Return ONLY a JSON array of objects with 'job_number' (1-indexed) "
-                        f"and 'score' (0-100) and 'reason' (1 sentence). No other text."
+                        f"Return a JSON array of objects with keys: "
+                        f"job_number (integer, 1-indexed), score (integer 0-100), reason (short string)."
                     ),
                     config=genai_types.GenerateContentConfig(
                         temperature=0.1,
-                        max_output_tokens=2000,
+                        max_output_tokens=4000,
+                        response_mime_type="application/json",
                     ),
                 )
 
                 text = response.text.strip()
-                # Clean markdown fences
-                text = text.replace("```json", "").replace("```", "").strip()
                 scores = json.loads(text)
 
+                # Handle both array and object-with-array responses
+                if isinstance(scores, dict):
+                    scores = scores.get("jobs", scores.get("scores", scores.get("results", [])))
+
                 for score_item in scores:
-                    idx = score_item["job_number"] - 1
+                    idx = score_item.get("job_number", 0) - 1
                     if 0 <= idx < len(batch):
-                        batch[idx]["relevance_score"] = score_item["score"]
+                        batch[idx]["relevance_score"] = score_item.get("score", 0)
                         batch[idx]["relevance_reason"] = score_item.get("reason", "")
+
+                logger.info(f"   ✅ Scored batch {i//batch_size + 1} ({len(batch)} jobs)")
 
             except Exception as e:
                 logger.warning(f"   AI scoring failed for batch: {e}")
-                # Fallback to keyword scoring
                 batch = self._keyword_score(batch)
 
             scored.extend(batch)
-            await asyncio.sleep(2)  # Rate limiting for free tier
+            await asyncio.sleep(4)  # 4s delay between batches for rate limiting
 
         # Ensure EVERY job has a score — assign 0 to any missed
         for job in scored:

@@ -93,7 +93,7 @@ class EmailDraftAgent:
 
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.0-flash",
                 contents=(
                     f"Write a professional outreach email to a recruiter/hiring manager.\n\n"
                     f"CONTEXT:\n"
@@ -125,6 +125,7 @@ class EmailDraftAgent:
                 config=genai_types.GenerateContentConfig(
                     temperature=0.7,
                     max_output_tokens=1000,
+                    response_mime_type="application/json",
                 ),
             )
 
