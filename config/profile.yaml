@@ -129,7 +129,7 @@ search:
     - "google_jobs"
 
   max_age_days: 3
-  min_relevance_score: 60
+  min_relevance_score: 30
 
   company_size_preference:
     - "seed"
