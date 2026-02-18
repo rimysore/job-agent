@@ -20,8 +20,6 @@ import asyncio
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
-from google import genai
-from google.genai import types as genai_types
 
 logger = logging.getLogger("JobSearcher")
 
@@ -619,100 +617,53 @@ class JobSearchAgent:
     # AI Relevance Scoring
     # ══════════════════════════════════════════════════════════
     async def score_jobs(self, jobs: list[dict]) -> list[dict]:
-        """Use Google Gemini (FREE) to score each job's relevance to the profile."""
-        if not self.gemini_key:
-            logger.warning("   ⚠️  No Gemini API key — using keyword scoring")
-            return self._keyword_score(jobs)
-
-        client = genai.Client(api_key=self.gemini_key)
-
-        # Use gemini-2.0-flash: 1500 requests/day free (vs 20/day for 2.5-flash)
-        MODEL = "gemini-2.0-flash"
-
-        # Larger batches = fewer API calls = stay within rate limits
-        batch_size = 25
-        scored = []
-
-        profile_summary = (
-            f"Target roles: {', '.join(self.profile['target_roles'])}\n"
-            f"Skills: {', '.join(self.profile['skills'][:20])}\n"
-            f"Experience: {self.profile['experience_years']} years\n"
-            f"Preferred locations: {', '.join(self.profile['preferred_locations'])}\n"
-            f"Remote OK: {self.profile['remote_ok']}\n"
-            f"Keywords: {', '.join(self.profile.get('target_keywords', []))}"
-        )
-
-        for i in range(0, len(jobs), batch_size):
-            batch = jobs[i:i + batch_size]
-            jobs_text = "\n\n".join([
-                f"JOB {j+1}:\n"
-                f"Title: {job['title']}\n"
-                f"Company: {job['company']}\n"
-                f"Location: {job.get('location', 'N/A')}\n"
-                f"Description: {job.get('description', 'N/A')[:300]}"
-                for j, job in enumerate(batch)
-            ])
-
-            try:
-                response = client.models.generate_content(
-                    model=MODEL,
-                    contents=(
-                        f"Score each job's relevance to this candidate profile (0-100).\n\n"
-                        f"CANDIDATE PROFILE:\n{profile_summary}\n\n"
-                        f"JOBS:\n{jobs_text}\n\n"
-                        f"Return a JSON array of objects with keys: "
-                        f"job_number (integer, 1-indexed), score (integer 0-100), reason (short string)."
-                    ),
-                    config=genai_types.GenerateContentConfig(
-                        temperature=0.1,
-                        max_output_tokens=4000,
-                        response_mime_type="application/json",
-                    ),
-                )
-
-                text = response.text.strip()
-                scores = json.loads(text)
-
-                # Handle both array and object-with-array responses
-                if isinstance(scores, dict):
-                    scores = scores.get("jobs", scores.get("scores", scores.get("results", [])))
-
-                for score_item in scores:
-                    idx = score_item.get("job_number", 0) - 1
-                    if 0 <= idx < len(batch):
-                        batch[idx]["relevance_score"] = score_item.get("score", 0)
-                        batch[idx]["relevance_reason"] = score_item.get("reason", "")
-
-                logger.info(f"   ✅ Scored batch {i//batch_size + 1} ({len(batch)} jobs)")
-
-            except Exception as e:
-                logger.warning(f"   AI scoring failed for batch: {e}")
-                batch = self._keyword_score(batch)
-
-            scored.extend(batch)
-            await asyncio.sleep(4)  # 4s delay between batches for rate limiting
-
-        # Ensure EVERY job has a score — assign 0 to any missed
-        for job in scored:
-            if "relevance_score" not in job or job["relevance_score"] is None:
-                job["relevance_score"] = 0
-                job["relevance_reason"] = "Not scored"
-
-        return scored
+        """Score each job's relevance using keyword matching (no API needed)."""
+        return self._keyword_score(jobs)
 
     def _keyword_score(self, jobs: list[dict]) -> list[dict]:
-        """Fallback keyword-based scoring."""
-        keywords = set(
-            [r.lower() for r in self.profile.get("target_roles", [])] +
-            [k.lower() for k in self.profile.get("target_keywords", [])] +
-            [s.lower() for s in self.profile.get("skills", [])]
-        )
+        """ATS-style keyword scoring with weighted categories."""
+        # Build keyword sets with weights
+        role_keywords = set(r.lower() for r in self.profile.get("target_roles", []))
+        skill_keywords = set(s.lower() for s in self.profile.get("skills", []))
+        target_keywords = set(k.lower() for k in self.profile.get("target_keywords", []))
+        preferred_locs = set(l.lower() for l in self.profile.get("preferred_locations", []))
 
         for job in jobs:
-            text = f"{job.get('title', '')} {job.get('description', '')}".lower()
-            matches = sum(1 for kw in keywords if kw in text)
-            job["relevance_score"] = min(100, int(matches / max(len(keywords), 1) * 150))
-            job["relevance_reason"] = f"Keyword match: {matches}/{len(keywords)}"
+            title = job.get("title", "").lower()
+            desc = job.get("description", "").lower()
+            location = job.get("location", "").lower()
+            text = f"{title} {desc}"
+            score = 0
+            reasons = []
+
+            # Title match (highest weight — 40 points max)
+            title_matches = sum(1 for kw in role_keywords if kw.lower() in title)
+            if title_matches:
+                score += min(40, title_matches * 20)
+                reasons.append(f"title match ({title_matches})")
+
+            # Skills match (30 points max)
+            skill_matches = sum(1 for kw in skill_keywords if kw.lower() in text)
+            if skill_matches:
+                score += min(30, int(skill_matches / max(len(skill_keywords), 1) * 60))
+                reasons.append(f"skills ({skill_matches}/{len(skill_keywords)})")
+
+            # Target keywords match (20 points max)
+            kw_matches = sum(1 for kw in target_keywords if kw.lower() in text)
+            if kw_matches:
+                score += min(20, int(kw_matches / max(len(target_keywords), 1) * 40))
+                reasons.append(f"keywords ({kw_matches})")
+
+            # Location match (10 points)
+            if "remote" in location or "remote" in title:
+                score += 10
+                reasons.append("remote")
+            elif any(loc in location for loc in preferred_locs):
+                score += 10
+                reasons.append("location match")
+
+            job["relevance_score"] = min(100, score)
+            job["relevance_reason"] = ", ".join(reasons) if reasons else "low match"
 
         return jobs
 

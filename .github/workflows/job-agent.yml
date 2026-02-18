@@ -6,10 +6,10 @@
 name: 🤖 JobHunter AI Agent
 
 on:
-  # Run twice daily: 9:00 AM EST and 6:30 PM EST
+  # Run every 90 minutes
   schedule:
-    - cron: "0 14 * * *"   # 9:00 AM EST (14:00 UTC)
-    - cron: "30 23 * * *"  # 6:30 PM EST (23:30 UTC)
+    - cron: "0 */3 * * *"    # Every 3 hours at :00
+    - cron: "30 1,4,7,10,13,16,19,22 * * *"  # Every 3 hours at :30 (offset = ~90 min pattern)
 
   # Manual trigger for testing
   workflow_dispatch:
@@ -19,9 +19,9 @@ on:
         required: false
         default: "false"
 
-  # Also run on push to master (for testing)
+  # Also run on push to main (for testing)
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - "config/**"
       - "agents/**"
@@ -75,7 +75,6 @@ jobs:
       # ── Run the Agent ──────────────────────────────────
       - name: 🤖 Run JobHunter Agent
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}

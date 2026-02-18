@@ -11,8 +11,6 @@ import aiohttp
 import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
-from google import genai
-from google.genai import types as genai_types
 
 logger = logging.getLogger("RecruiterFinder")
 
@@ -122,9 +120,21 @@ class RecruiterFinderAgent:
         if recruiter_data["people"]:
             recruiter_data = await self._find_emails(recruiter_data)
 
-        # Use AI to analyze and enrich the recruiter data
-        if recruiter_data["people"] and self.gemini_key:
-            recruiter_data = await self._enrich_with_ai(recruiter_data)
+        # Simple rule-based enrichment (no AI needed)
+        for person in recruiter_data["people"]:
+            ptype = person.get("person_type", "other")
+            if ptype == "recruiter":
+                person["outreach_priority"] = "high"
+                person["outreach_angle"] = f"Connect about {recruiter_data['job_title']} role"
+            elif ptype == "hiring_manager":
+                person["outreach_priority"] = "high"
+                person["outreach_angle"] = f"Express interest in joining the team"
+            elif ptype == "leadership":
+                person["outreach_priority"] = "medium"
+                person["outreach_angle"] = f"Show passion for company mission"
+            else:
+                person["outreach_priority"] = "low"
+                person["outreach_angle"] = f"Ask about team culture and openings"
 
         if recruiter_data["people"]:
             logger.info(f"   👤 {company}: Found {len(recruiter_data['people'])} contacts")
@@ -243,50 +253,5 @@ class RecruiterFinderAgent:
                         # Most common pattern: first.last@company.com
                         person["email"] = f"{first}.{last}@{domain}"
                         person["email_guessed"] = True
-
-        return recruiter_data
-
-    async def _enrich_with_ai(self, recruiter_data: dict) -> dict:
-        """Use Gemini to analyze and add insights about each recruiter."""
-        try:
-            client = genai.Client(api_key=self.gemini_key)
-
-            people_text = "\n".join([
-                f"- {p['name']} | {p['role']} | {p['person_type']} | {p['snippet']}"
-                for p in recruiter_data["people"]
-            ])
-
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=(
-                    f"Analyze these people at {recruiter_data['company']} for a job outreach strategy. "
-                    f"For each person, provide a JSON array with:\n"
-                    f"- 'name': their name\n"
-                    f"- 'priority': 'high', 'medium', or 'low' for outreach\n"
-                    f"- 'outreach_angle': 1 sentence on best way to approach them\n"
-                    f"- 'talking_points': list of 2-3 things to mention based on their role\n\n"
-                    f"People:\n{people_text}\n\n"
-                    f"Job being applied to: {recruiter_data['job_title']}\n\n"
-                    f"Return a JSON array."
-                ),
-                config=genai_types.GenerateContentConfig(
-                    temperature=0.2,
-                    max_output_tokens=1500,
-                    response_mime_type="application/json",
-                ),
-            )
-
-            text = response.text.strip()
-            insights = json.loads(text)
-
-            for insight in insights:
-                for person in recruiter_data["people"]:
-                    if person["name"].lower() == insight.get("name", "").lower():
-                        person["outreach_priority"] = insight.get("priority", "medium")
-                        person["outreach_angle"] = insight.get("outreach_angle", "")
-                        person["talking_points"] = insight.get("talking_points", [])
-
-        except Exception as e:
-            logger.warning(f"   AI enrichment failed: {e}")
 
         return recruiter_data
