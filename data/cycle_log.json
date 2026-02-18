@@ -1,0 +1,92 @@
+[
+  {
+    "started_at": "2026-02-17T23:06:20.691526+00:00",
+    "completed_at": "2026-02-17T23:10:38.923965+00:00",
+    "jobs_found": 217,
+    "jobs_relevant": 0,
+    "apps_queued": 0,
+    "recruiters_found": 0,
+    "drafts_created": 0
+  },
+  {
+    "started_at": "2026-02-17T23:37:16.555893+00:00",
+    "completed_at": "2026-02-17T23:38:10.501836+00:00",
+    "jobs_found": 62,
+    "jobs_relevant": 0,
+    "apps_queued": 0,
+    "recruiters_found": 0,
+    "drafts_created": 0
+  },
+  {
+    "started_at": "2026-02-17T23:51:20.723175+00:00",
+    "completed_at": "2026-02-17T23:52:14.614683+00:00",
+    "jobs_found": 54,
+    "jobs_relevant": 0,
+    "apps_queued": 0,
+    "recruiters_found": 0,
+    "drafts_created": 0
+  },
+  {
+    "started_at": "2026-02-18T10:07:04.444089+00:00",
+    "completed_at": "2026-02-18T10:08:03.521948+00:00",
+    "jobs_found": 101,
+    "jobs_relevant": 0,
+    "apps_queued": 0,
+    "recruiters_found": 0,
+    "drafts_created": 0
+  },
+  {
+    "started_at": "2026-02-18T14:42:05.870076+00:00",
+    "completed_at": "2026-02-18T14:43:06.206785+00:00",
+    "jobs_found": 95,
+    "jobs_relevant": 0,
+    "apps_queued": 0,
+    "recruiters_found": 0,
+    "drafts_created": 0
+  },
+  {
+    "started_at": "2026-02-18T19:12:11.578521+00:00",
+    "completed_at": "2026-02-18T19:12:53.613371+00:00",
+    "jobs_found": 84,
+    "jobs_relevant": 0,
+    "apps_queued": 0,
+    "recruiters_found": 0,
+    "drafts_created": 0
+  },
+  {
+    "started_at": "2026-02-18T19:20:09.251723+00:00",
+    "completed_at": "2026-02-18T19:20:50.530757+00:00",
+    "jobs_found": 37,
+    "jobs_relevant": 0,
+    "apps_queued": 0,
+    "recruiters_found": 0,
+    "drafts_created": 0
+  },
+  {
+    "started_at": "2026-02-18T19:28:49.236373+00:00",
+    "completed_at": "2026-02-18T19:34:26.117428+00:00",
+    "jobs_found": 26,
+    "jobs_relevant": 17,
+    "apps_queued": 17,
+    "recruiters_found": 8,
+    "drafts_created": 24
+  },
+  {
+    "started_at": "2026-02-18T20:01:21.734354+00:00",
+    "completed_at": "2026-02-18T20:05:21.031066+00:00",
+    "jobs_found": 28,
+    "jobs_relevant": 13,
+    "apps_queued": 13,
+    "recruiters_found": 7,
+    "drafts_created": 21
+  },
+  {
+    "started_at": "2026-02-18T21:26:36.503110+00:00",
+    "completed_at": "2026-02-18T21:29:08.696830+00:00",
+    "jobs_found": 25,
+    "jobs_relevant": 13,
+    "apps_queued": 13,
+    "recruiters_found": 4,
+    "drafts_created": 12
+  }
+]
