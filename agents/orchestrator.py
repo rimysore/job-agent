@@ -47,10 +47,21 @@ class AgentOrchestrator:
 
         # ── Step 2: Score relevance with AI ──────────────────
         logger.info("━" * 50)
-        logger.info("🧠 STEP 2: Scoring relevance with AI...")
+        logger.info("🧠 STEP 2: Scoring relevance...")
         scored_jobs = await self.job_searcher.score_jobs(new_jobs)
-        min_score = self.config.get("search", {}).get("min_relevance_score", 60)
+        min_score = self.config.get("search", {}).get("min_relevance_score", 30)
         hot_jobs = [j for j in scored_jobs if j.get("relevance_score", 0) >= min_score]
+
+        # Log score distribution for debugging
+        if scored_jobs:
+            scores = [j.get("relevance_score", 0) for j in scored_jobs]
+            logger.info(f"   Score distribution: min={min(scores)}, max={max(scores)}, "
+                        f"avg={sum(scores)//len(scores)}, above {min_score}: {len(hot_jobs)}")
+            # Show top 5 for debugging
+            top5 = sorted(scored_jobs, key=lambda j: j.get("relevance_score", 0), reverse=True)[:5]
+            for j in top5:
+                logger.info(f"   📌 {j['relevance_score']}% — {j['title']} @ {j['company']} [{j.get('relevance_reason','')}]")
+
         logger.info(f"   {len(hot_jobs)} jobs scored above threshold ({min_score})")
 
         # ── Step 3: Queue applications ───────────────────────

@@ -622,8 +622,20 @@ class JobSearchAgent:
 
     def _keyword_score(self, jobs: list[dict]) -> list[dict]:
         """ATS-style keyword scoring with weighted categories."""
-        # Build keyword sets with weights
-        role_keywords = set(r.lower() for r in self.profile.get("target_roles", []))
+        # Break multi-word roles into individual matchable terms
+        # "Machine Learning Engineer" → {"machine", "learning", "engineer", "machine learning", "machine learning engineer"}
+        role_phrases = [r.lower() for r in self.profile.get("target_roles", [])]
+        role_words = set()
+        for phrase in role_phrases:
+            role_words.add(phrase)  # Full phrase
+            words = phrase.split()
+            for w in words:
+                if w not in ("of", "the", "a", "an", "and", "or", "in", "at", "for"):
+                    role_words.add(w)
+            # Also add bigrams: "machine learning", "full stack", etc.
+            for i in range(len(words) - 1):
+                role_words.add(f"{words[i]} {words[i+1]}")
+
         skill_keywords = set(s.lower() for s in self.profile.get("skills", []))
         target_keywords = set(k.lower() for k in self.profile.get("target_keywords", []))
         preferred_locs = set(l.lower() for l in self.profile.get("preferred_locations", []))
@@ -637,30 +649,49 @@ class JobSearchAgent:
             reasons = []
 
             # Title match (highest weight — 40 points max)
-            title_matches = sum(1 for kw in role_keywords if kw.lower() in title)
-            if title_matches:
-                score += min(40, title_matches * 20)
-                reasons.append(f"title match ({title_matches})")
+            # Score higher for full phrase matches, lower for single word
+            title_score = 0
+            for kw in role_words:
+                if kw in title:
+                    if " " in kw:  # Multi-word = stronger signal
+                        title_score += 15
+                    else:
+                        title_score += 5
+            title_score = min(40, title_score)
+            if title_score > 0:
+                score += title_score
+                reasons.append(f"title ({title_score}pts)")
 
             # Skills match (30 points max)
-            skill_matches = sum(1 for kw in skill_keywords if kw.lower() in text)
-            if skill_matches:
-                score += min(30, int(skill_matches / max(len(skill_keywords), 1) * 60))
-                reasons.append(f"skills ({skill_matches}/{len(skill_keywords)})")
+            # Also split multi-word skills: "machine learning" → also match "machine", "learning"
+            skill_matches = 0
+            for sk in skill_keywords:
+                if sk in text:
+                    skill_matches += 1
+                else:
+                    # Try individual words from multi-word skills
+                    for word in sk.split():
+                        if len(word) > 3 and word in text:
+                            skill_matches += 0.5
+                            break
+            skill_score = min(30, int(skill_matches / max(len(skill_keywords), 1) * 80))
+            if skill_score > 0:
+                score += skill_score
+                reasons.append(f"skills ({int(skill_matches)}/{len(skill_keywords)})")
 
             # Target keywords match (20 points max)
-            kw_matches = sum(1 for kw in target_keywords if kw.lower() in text)
+            kw_matches = sum(1 for kw in target_keywords if kw in text)
             if kw_matches:
-                score += min(20, int(kw_matches / max(len(target_keywords), 1) * 40))
+                score += min(20, int(kw_matches / max(len(target_keywords), 1) * 50))
                 reasons.append(f"keywords ({kw_matches})")
 
             # Location match (10 points)
-            if "remote" in location or "remote" in title:
+            if "remote" in location or "remote" in title or "remote" in desc[:200]:
                 score += 10
                 reasons.append("remote")
             elif any(loc in location for loc in preferred_locs):
                 score += 10
-                reasons.append("location match")
+                reasons.append("location")
 
             job["relevance_score"] = min(100, score)
             job["relevance_reason"] = ", ".join(reasons) if reasons else "low match"
