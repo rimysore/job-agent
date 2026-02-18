@@ -3,113 +3,143 @@
 # ╚══════════════════════════════════════════════════════════════╝
 
 name: "Rithvik Mysore Suresh"
-email: "rithviksit@gmail.com"
-phone: "+1-XXX-XXX-XXXX"
-location: "United States"
+email: "rimysore@iu.edu"
+phone: "+1-812-322-3958"
+location: "United States (any state), with preference for San Francisco Bay Area"
 
 resume_url: ""
-linkedin_url: ""
-github_url: ""
-portfolio_url: ""
+linkedin_url: "https://linkedin.com/in/rithvikms"
+github_url: "https://github.com/rimysore"
+portfolio_url: "https://rithviksuresh.com"
 
 # ── Target Roles ─────────────────────────────────────────────
 target_roles:
-  - "AI Engineer"
-  - "Machine Learning Engineer"
   - "Software Engineer"
   - "Full Stack Engineer"
-  - "Backend Engineer"
-  - "MLOps Engineer"
-  - "Applied AI Scientist"
+  - "Frontend Engineer"
+  - "AI Engineer"
+  - "Machine Learning Engineer"
   - "LLM Engineer"
-  - "Platform Engineer"
+  - "Applied AI Engineer"
+  - "Backend Engineer"
 
 target_keywords:
-  - "LLM"
+  - "React.js"
+  - "system design"
+  - "performance optimization"
+  - "CI/CD automation"
   - "generative AI"
   - "RAG"
-  - "transformer"
-  - "langchain"
-  - "autonomous agents"
+  - "vector embeddings"
+  - "semantic search"
   - "NLP"
-  - "deep learning"
-  - "computer vision"
-  - "distributed systems"
+  - "prompt engineering"
+  - "microservices"
 
-experience_years: 3
+experience_years: 2
 
 skills:
   - "Python"
-  - "TypeScript"
   - "JavaScript"
-  - "React"
+  - "TypeScript"
+  - "C"
+  - "SQL"
+  - "HTML"
+  - "CSS"
+  - "React.js"
   - "Node.js"
-  - "FastAPI"
+  - "React Native"
+  - "Flask"
+  - "Apache Spark"
   - "Django"
-  - "PostgreSQL"
+  - "Claude LLM"
+  - "Generative AI"
+  - "RAG"
+  - "Vector Embeddings"
+  - "Semantic Search"
+  - "NLP"
+  - "Prompt Engineering"
+  - "AI System Design"
+  - "MongoDB Atlas"
+  - "Vector Search"
+  - "Elasticsearch"
   - "MongoDB"
-  - "Redis"
+  - "Git"
   - "Docker"
   - "Kubernetes"
-  - "AWS"
-  - "GCP"
   - "Terraform"
-  - "PyTorch"
-  - "TensorFlow"
-  - "LangChain"
-  - "OpenAI API"
-  - "Anthropic API"
-  - "Hugging Face"
-  - "Vector Databases"
-  - "Pinecone"
-  - "Weaviate"
   - "CI/CD"
-  - "Git"
+  - "GitHub Actions"
+  - "Vercel"
+  - "Render"
+  - "Production Monitoring"
+  - "Microservices Architecture"
+  - "Agile/Scrum"
+  - "Secure Coding"
 
 education:
-  - degree: "B.S. Computer Science"
-    university: "Your University"
-    year: 2022
+  - degree: "Master of Science in Computer Science"
+    university: "Indiana University Bloomington"
+    year: 2026
     gpa: "3.8"
+  - degree: "Bachelor of Engineering in Computer Science"
+    university: "Siddaganga Institute of Technology"
+    year: 2022
+    gpa: ""
 
 work_experience:
-  - title: "AI Engineer"
-    company: "Your Current/Last Company"
-    duration: "2022 - Present"
+  - title: "Graduate Project Intern"
+    company: "IU Capital Planning and Facilities"
+    duration: "Oct 2024 - Present"
     highlights:
-      - "Built RAG pipelines serving 10K+ users"
-      - "Developed autonomous AI agents using LangChain"
-      - "Reduced inference latency by 60% with model optimization"
+      - "Engineered and executed a Python-based analytical and reporting framework for complex data inconsistencies and multi-dimensional validation."
+      - "Generated high-fidelity capital planning reports to support operational decision-making."
+  - title: "Software Specialist"
+    company: "Mercedes-Benz Research & Development India"
+    duration: "Aug 2022 - Jul 2024"
+    highlights:
+      - "Contributed to OneMB React-based internal application serving 5,000+ employees with 99.9% uptime."
+      - "Led end-to-end React.js optimization initiative and improved rendering performance by 30% via lazy loading, code-splitting, and image delivery enhancements."
+      - "Established automated CI/CD deployment pipeline that reduced manual effort by 75% and mentored a junior engineer on system design and code quality."
+  - title: "Graduate Engineering Trainee"
+    company: "Mercedes-Benz Research & Development India"
+    duration: "Apr 2022 - Jul 2022"
+    highlights:
+      - "Executed production-grade WordPress deployments with under one minute downtime using standardized release and rollback procedures."
+      - "Developed 8+ reusable UI components and micro-frontends, reducing code duplication by 25%."
 
 projects:
-  - name: "AI Job Hunter Agent"
-    description: "Multi-agent system that autonomously searches jobs, finds recruiters, and queues applications"
-    tech: ["Python", "LLM APIs", "GitHub Actions"]
+  - name: "JobMate - Career Guidance App"
+    description: "Built a full-stack AI platform with React frontend, Claude LLM, vector embedding RAG system, MongoDB backend, and Adzuna API; achieved 98% semantic accuracy on 500K+ career-job matching queries."
+    tech: ["React", "Claude LLM", "RAG", "Machine Learning", "MongoDB", "Adzuna API"]
     url: ""
 
-  - name: "RAG Knowledge Base"
-    description: "Enterprise RAG system with hybrid search over 1M+ documents"
-    tech: ["LangChain", "Pinecone", "FastAPI", "React"]
+  - name: "3D World Explorer"
+    description: "Built an iOS app that integrates AI-generated world descriptions and real-time 3D visualizations at 60 FPS using SceneKit."
+    tech: ["Swift", "SwiftUI", "SceneKit", "Claude API"]
     url: ""
 
-  - name: "Real-time ML Pipeline"
-    description: "End-to-end ML pipeline processing 50K events/sec with auto-retraining"
-    tech: ["PyTorch", "Kafka", "Kubernetes", "MLflow"]
+  - name: "CuraSure"
+    description: "Engineered a full-stack MERN platform with RBAC, authentication + 2FA, 25+ RESTful APIs, and production deployment on Vercel and MongoDB Atlas."
+    tech: ["React", "JavaScript", "MongoDB", "Docker", "Vercel", "REST APIs"]
     url: ""
 
 # ── Job Preferences — US WIDE, SF BAY AREA FOCUS ────────────
 preferred_locations:
+  - "United States"
+  - "Any US State"
+  - "San Francisco Bay Area"
+  - "Bloomington, IN"
+  - "Indianapolis, IN"
   - "San Francisco, CA"
   - "San Jose, CA"
   - "Mountain View, CA"
   - "Palo Alto, CA"
-  - "New York, NY"
-  - "Seattle, WA"
-  - "Austin, TX"
-  - "Los Angeles, CA"
-  - "Chicago, IL"
-  - "Boston, MA"
-  - "Denver, CO"
+  - "Sunnyvale, CA"
+  - "Santa Clara, CA"
+  - "Oakland, CA"
+  - "Berkeley, CA"
+  - "Fremont, CA"
   - "Remote"
 
 remote_ok: true
@@ -128,7 +158,8 @@ search:
     - "ycombinator"
     - "google_jobs"
 
-  max_age_days: 3
+  max_age_days: 1
+  max_age_hours: 20
   min_relevance_score: 30
 
   company_size_preference:
@@ -136,6 +167,9 @@ search:
     - "series_a"
     - "series_b"
     - "startup"
+    - "mid_size"
+    - "large_enterprise"
+    - "faang"
 
   exclude_companies: []
 

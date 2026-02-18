@@ -38,10 +38,16 @@ class JobSearchAgent:
         # API clients
         self.serper_key = config["api_keys"].get("serper", "")
         self.gemini_key = config["api_keys"].get("gemini", "")
-        self.max_age_hours = 48  # Only jobs posted in last 48 hours
+        # Age filter precedence: explicit hours, then days, then default (48h)
+        max_age_hours = self.search_config.get("max_age_hours")
+        if max_age_hours is not None:
+            self.max_age_hours = int(max_age_hours)
+        else:
+            max_age_days = self.search_config.get("max_age_days")
+            self.max_age_hours = int(max_age_days) * 24 if max_age_days is not None else 48
 
     def _is_within_age_limit(self, date_str: str) -> bool:
-        """Check if a date string is within the max age limit (48 hours)."""
+        """Check if a date string is within the configured max age limit."""
         if not date_str:
             return True  # If no date, include it (benefit of the doubt)
         try:
