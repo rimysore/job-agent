@@ -8725,5 +8725,41 @@
     "posted_at": "2026-09-14T20:11:00-04:00",
     "id": "36c5433ee5e63747",
     "discovered_at": "2026-09-15T00:44:32.614009+00:00"
+  },
+  {
+    "title": "Senior Software Engineer - Affirm",
+    "company": "HYPR",
+    "url": "https://www.hypr.com/open-positions?gh_jid=8825654002",
+    "description": "",
+    "location": "New York, New York",
+    "source": "greenhouse",
+    "department": "",
+    "posted_at": "2026-09-21T10:48:08-04:00",
+    "id": "78727cd3e3df226f",
+    "discovered_at": "2026-09-21T15:26:17.485748+00:00"
+  },
+  {
+    "title": "Senior Software Engineer - Endpoint Products",
+    "company": "HYPR",
+    "url": "https://www.hypr.com/open-positions?gh_jid=8706937002",
+    "description": "",
+    "location": "Belgrade, Serbia",
+    "source": "greenhouse",
+    "department": "",
+    "posted_at": "2026-09-21T10:48:44-04:00",
+    "id": "80e57e25f62b6b37",
+    "discovered_at": "2026-09-21T15:26:17.485778+00:00"
+  },
+  {
+    "title": "Senior Software Engineer in Test - Affirm",
+    "company": "HYPR",
+    "url": "https://www.hypr.com/open-positions?gh_jid=8825655002",
+    "description": "",
+    "location": "New York, New York",
+    "source": "greenhouse",
+    "department": "",
+    "posted_at": "2026-09-21T10:48:26-04:00",
+    "id": "f933fe585f56e6d5",
+    "discovered_at": "2026-09-21T15:26:17.485791+00:00"
   }
 ]
