@@ -493,5 +493,14 @@
     "apps_queued": 0,
     "recruiters_found": 0,
     "drafts_created": 0
+  },
+  {
+    "started_at": "2026-10-28T21:11:45.442280+00:00",
+    "completed_at": "2026-10-28T21:12:12.482082+00:00",
+    "jobs_found": 2,
+    "jobs_relevant": 0,
+    "apps_queued": 0,
+    "recruiters_found": 0,
+    "drafts_created": 0
   }
 ]
